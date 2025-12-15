@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Queue System Calculator</title>
+  <meta name="description" content="Interactive queue system calculator for analyzing D/D/1/K-1, M/M/1, and M/M/C queueing models. Calculate L, Lq, W, Wq metrics with real-time visualization." />
+  <meta name="author" content="Queue Calculator" />
+  <link rel="canonical" href="/" />
+  
+  <meta property="og:title" content="Queue System Calculator" />
+  <meta property="og:description" content="Interactive queueing theory simulator for academic use. Calculate performance metrics for D/D/1, M/M/1, and M/M/C models." />
+  <meta property="og:type" content="website" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles.css">
+  <link rel="icon" href="/assets/favicon.ico">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-content">
+        <h1>Queue System Calculator</h1>
+        <p class="subtitle">Interactive Queueing Theory Simulator for Academic Use</p>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Model Selection -->
+      <section class="card model-selection">
+        <h2>Select Queue Model</h2>
+        <div class="model-tabs">
+          <button class="tab-btn active" data-model="DD1K1">D/D/1/K-1</button>
+          <button class="tab-btn" data-model="MM1">M/M/1</button>
+          <button class="tab-btn" data-model="MMC">M/M/C</button>
+        </div>
+        <p class="model-description" id="modelDescription">
+          Deterministic arrival and service with single server and finite capacity K-1
+        </p>
+      </section>
+
+      <div class="content-grid">
+        <!-- Input Section -->
+        <section class="card input-section">
+          <h2>Parameters</h2>
+          <form id="queueForm" class="input-form">
+            <div class="input-group" id="lambdaGroup">
+              <label for="lambda">
+                Arrival Rate (λ)
+                <span class="tooltip" data-tip="Average number of arrivals per time unit">?</span>
+              </label>
+              <input type="number" id="lambda" name="lambda" step="0.01" min="0" value="2" required>
+            </div>
+
+            <div class="input-group" id="muGroup">
+              <label for="mu">
+                Service Rate (μ)
+                <span class="tooltip" data-tip="Average number of customers served per time unit">?</span>
+              </label>
+              <input type="number" id="mu" name="mu" step="0.01" min="0" value="3" required>
+            </div>
+
+            <div class="input-group" id="cGroup" style="display: none;">
+              <label for="c">
+                Number of Servers (c)
+                <span class="tooltip" data-tip="Total number of parallel servers">?</span>
+              </label>
+              <input type="number" id="c" name="c" step="1" min="1" value="2">
+            </div>
+
+            <div class="input-group" id="kGroup">
+              <label for="k">
+                System Capacity (K)
+                <span class="tooltip" data-tip="Maximum number of customers in the system">?</span>
+              </label>
+              <input type="number" id="k" name="k" step="1" min="1" value="10">
+            </div>
+
+            <div class="input-group" id="n0Group">
+              <label for="n0">
+                Initial Customers (n₀)
+                <span class="tooltip" data-tip="Number of customers at time t=0">?</span>
+              </label>
+              <input type="number" id="n0" name="n0" step="1" min="0" value="0">
+            </div>
+
+            <div class="input-group" id="tGroup">
+              <label for="t">
+                Time (t)
+                <span class="tooltip" data-tip="Time point for calculating n(t)">?</span>
+              </label>
+              <input type="number" id="t" name="t" step="0.1" min="0" value="5">
+            </div>
+
+            <button type="submit" class="calculate-btn">Calculate Metrics</button>
+          </form>
+
+          <div class="error-message" id="errorMessage"></div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="card results-section">
+          <h2>Results</h2>
+          <div class="metrics-grid" id="metricsGrid">
+            <div class="metric-card">
+              <div class="metric-label">
+                n(t)
+                <span class="tooltip" data-tip="Number of customers in system at time t">?</span>
+              </div>
+              <div class="metric-value" id="metricNt">-</div>
+              <div class="metric-desc">Customers at time t</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">
+                L
+                <span class="tooltip" data-tip="Average number of customers in the entire system">?</span>
+              </div>
+              <div class="metric-value" id="metricL">-</div>
+              <div class="metric-desc">Avg in system</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">
+                Lq
+                <span class="tooltip" data-tip="Average number of customers waiting in queue">?</span>
+              </div>
+              <div class="metric-value" id="metricLq">-</div>
+              <div class="metric-desc">Avg in queue</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">
+                W
+                <span class="tooltip" data-tip="Average time a customer spends in the system">?</span>
+              </div>
+              <div class="metric-value" id="metricW">-</div>
+              <div class="metric-desc">Avg time in system</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">
+                Wq
+                <span class="tooltip" data-tip="Average time a customer spends waiting in queue">?</span>
+              </div>
+              <div class="metric-value" id="metricWq">-</div>
+              <div class="metric-desc">Avg wait time</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">
+                ρ
+                <span class="tooltip" data-tip="Server utilization (traffic intensity)">?</span>
+              </div>
+              <div class="metric-value" id="metricRho">-</div>
+              <div class="metric-desc">Utilization</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Queue Diagram -->
+      <section class="card diagram-section">
+        <h2>Queue Visualization</h2>
+        <div class="diagram-container">
+          <svg id="queueDiagram" viewBox="0 0 700 200"></svg>
+        </div>
+        <div class="diagram-legend">
+          <span><span class="legend-dot arrival"></span> Arrivals (λ)</span>
+          <span><span class="legend-dot queue"></span> Queue</span>
+          <span><span class="legend-dot server"></span> Server(s)</span>
+          <span><span class="legend-dot departure"></span> Departures (μ)</span>
+        </div>
+      </section>
+
+      <!-- Formula Reference -->
+      <section class="card formula-section">
+        <h2>Formula Reference</h2>
+        <div class="formula-content" id="formulaContent">
+          <div class="formula-item">
+            <strong>D/D/1/K-1 Model:</strong>
+            <code>n(t) = n₀ + (λ - μ)t</code> (bounded by 0 and K-1)
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Queue System Calculator — Educational Tool for Queueing Theory</p>
+    </footer>
+  </div>
+
+  <script src="/src/main.js"></script>
+</body>
+</html>
