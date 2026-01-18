@@ -1,21 +1,21 @@
-// /**
-//  * Queue System Calculator - Main JavaScript
-//  * Implements D/D/1/K-1, M/M/1, and M/M/C queueing models
-//  */
+/**
+ * Queue System Calculator - Main JavaScript
+ * Implements D/D/1/K-1, M/M/1, and M/M/C queueing models
+ */
 
-// // ============================================
-// // QUEUEING THEORY MATH FUNCTIONS
-// // ============================================
+// ============================================
+// QUEUEING THEORY MATH FUNCTIONS
+// ============================================
 
-// /**
-//  * Calculate D/D/1/K-1 metrics (Deterministic model)
-//  * @param {number} lambda - Arrival rate
-//  * @param {number} mu - Service rate
-//  * @param {number} K - System capacity
-//  * @param {number} n0 - Initial customers
-//  * @param {number} t - Time point
-//  * @returns {Object} Queue metrics
-//  */
+/**
+ * Calculate D/D/1/K-1 metrics (Deterministic model)
+ * @param {number} lambda - Arrival rate
+ * @param {number} mu - Service rate
+ * @param {number} K - System capacity
+ * @param {number} n0 - Initial customers
+ * @param {number} t - Time point
+ * @returns {Object} Queue metrics
+ */
 function calculateDD1K1(lambda, mu, K, n0, t) {
     // Instantaneous number in system
     const netRate = lambda - mu;
@@ -24,37 +24,13 @@ function calculateDD1K1(lambda, mu, K, n0, t) {
 
     const rho = lambda / mu;
 
-    let L = 0;
-    let Lq = 0;
-
-    if (lambda < mu) {
-        // System periodically empties
-        // Average customers in system over a cycle (educational approximation)
-        L = (lambda * lambda) / (2 * mu * (mu - lambda));
-        // Lq should be L minus mean in service (<=1)
-        Lq = L - (lambda / mu);
-        // Ensure non-negative
-        Lq = Math.max(0, Lq);
-    } else if (Math.abs(lambda - mu) < 1e-9) {
-
-        // Linear growth / flat depending on initial condition
-        L = n0;
-        Lq = Math.max(0, n0 - 1);
-    } else {
-        // System saturates at capacity
-        L = K - 1;
-        Lq = Math.max(0, K - 2);
-    }
-
-    const W = lambda > 0 ? L / lambda : 0;
-    const Wq = lambda > 0 ? Lq / lambda : 0;
-
+    // D/D/1/K-1 is deterministic - no steady-state probabilistic metrics
     return {
         nt: +nt.toFixed(3),
-        L: +L.toFixed(3),
-        Lq: +Lq.toFixed(3),
-        W: +W.toFixed(3),
-        Wq: +Wq.toFixed(3),
+        L: "N/A",
+        Lq: "N/A",
+        W: "N/A",
+        Wq: "N/A",
         rho: +rho.toFixed(3)
     };
 }
@@ -67,7 +43,7 @@ function calculateMM1(lambda, mu) {
 
     if (rho >= 1) {
         return {
-            nt: Infinity,
+            nt: "N/A",
             L: Infinity,
             Lq: Infinity,
             W: Infinity,
@@ -82,8 +58,9 @@ function calculateMM1(lambda, mu) {
     const W = 1 / (mu - lambda);
     const Wq = rho / (mu * (1 - rho));
 
+    // M/M/1 is stochastic - no deterministic n(t)
     return {
-        nt: +L.toFixed(3),
+        nt: "N/A",
         L: +L.toFixed(3),
         Lq: +Lq.toFixed(3),
         W: +W.toFixed(3),
@@ -110,7 +87,7 @@ function calculateMMC(lambda, mu, c) {
 
     if (rho >= 1) {
         return {
-            nt: Infinity,
+            nt: "N/A",
             L: Infinity,
             Lq: Infinity,
             W: Infinity,
@@ -135,8 +112,9 @@ function calculateMMC(lambda, mu, c) {
     const W = L / lambda;
     const Wq = Lq / lambda;
 
+    // M/M/C is stochastic - no deterministic n(t)
     return {
-        nt: +L.toFixed(3),
+        nt: "N/A",
         L: +L.toFixed(3),
         Lq: +Lq.toFixed(3),
         W: +W.toFixed(3),
@@ -331,12 +309,12 @@ function setupModelTabs() {
  */
 function clearResults() {
     const el = (id) => document.getElementById(id);
-    if (el('metricNt')) el('metricNt').textContent = '-';
-    if (el('metricL')) el('metricL').textContent = '-';
-    if (el('metricLq')) el('metricLq').textContent = '-';
-    if (el('metricW')) el('metricW').textContent = '-';
-    if (el('metricWq')) el('metricWq').textContent = '-';
-    if (el('metricRho')) el('metricRho').textContent = '-';
+    if (el('metricNt')) el('metricNt').textContent = '?';
+    if (el('metricL')) el('metricL').textContent = '?';
+    if (el('metricLq')) el('metricLq').textContent = '?';
+    if (el('metricW')) el('metricW').textContent = '?';
+    if (el('metricWq')) el('metricWq').textContent = '?';
+    if (el('metricRho')) el('metricRho').textContent = '?';
     hideError();
 }
 
@@ -352,6 +330,7 @@ function displayResults(results) {
     hideError();
 
     const format = (val) => {
+        if (val === "N/A") return 'N/A';
         if (val === Infinity) return '∞';
         if (isNaN(val)) return '-';
         return (typeof val === 'number') ? val.toFixed(3) : val;
